@@ -18,15 +18,6 @@ func InitApp(app App) error {
 	closeChan := make(chan os.Signal, 2)
 	signal.Notify(closeChan, syscall.SIGTERM, syscall.SIGINT)
 
-	logger, _ := zap.NewProduction()
-	defer func(logger *zap.Logger) {
-		err := logger.Sync()
-		if err != nil {
-			logger.Fatal("Failed to sync logger", zap.Error(err))
-		}
-	}(logger)
-	zap.ReplaceGlobals(logger)
-
 	zap.L().Info("Server starting")
 	go func() {
 		err := app.Start(parentCtx)

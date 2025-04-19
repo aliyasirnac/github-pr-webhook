@@ -3,11 +3,16 @@ package webhookConfig
 import "context"
 
 type ServerConfig struct {
-	Postgres Postgres
+	Postgres      Postgres
+	OpenTelemetry OpenTelemetry
 }
 
 type Postgres struct {
 	Dsn string
+}
+
+type OpenTelemetry struct {
+	OtelTraceEndpoint string
 }
 
 func LoadConfig(ctx context.Context) (*ServerConfig, error) {

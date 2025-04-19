@@ -2,6 +2,7 @@ package webhookHandler
 
 import (
 	"context"
+	"github.com/hashicorp/go-retryablehttp"
 	"go.uber.org/zap"
 )
 
@@ -11,10 +12,14 @@ type GithubWebhookResponse struct {
 	Id int64 `json:"id"`
 }
 
-type GithubWebhookHandler struct{}
+type GithubWebhookHandler struct {
+	RetryClient *retryablehttp.Client
+}
 
-func NewGithubWebhookHandler() *GithubWebhookHandler {
-	return &GithubWebhookHandler{}
+func NewGithubWebhookHandler(retryClient *retryablehttp.Client) *GithubWebhookHandler {
+	return &GithubWebhookHandler{
+		RetryClient: retryClient,
+	}
 }
 
 func (w *GithubWebhookHandler) Handle(ctx context.Context, req *GithubWebhookRequest) (*GithubWebhookResponse, error) {
