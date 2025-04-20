@@ -5,6 +5,8 @@ import (
 	"github.com/aliyasirnac/github-pr-webhook-bot/app"
 	serverapp "github.com/aliyasirnac/github-pr-webhook-bot/app/serverApp"
 	"github.com/aliyasirnac/github-pr-webhook-bot/internal/apps/webhook/webhookConfig"
+	_ "github.com/aliyasirnac/github-pr-webhook-bot/internal/logger"
+	"github.com/aliyasirnac/github-pr-webhook-bot/internal/pubsub"
 	"go.uber.org/zap"
 	"log"
 )
@@ -15,8 +17,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
-	serverApp := serverapp.New(config)
-	err = app.InitApp(serverApp)
+	rabbitmq := pubsub.NewRabbitMQ()
+	serverApp := serverapp.New(config, rabbitmq)
+	err = app.InitApp(serverApp, ctx)
 	if err != nil {
 		zap.L().Fatal("Error initializing app", zap.Error(err))
 		panic(err)

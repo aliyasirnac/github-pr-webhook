@@ -3,6 +3,7 @@ package serverapp
 import (
 	"context"
 	"errors"
+	"github.com/aliyasirnac/github-pr-webhook-bot/internal/apps/webhook/webhookHandler"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 )
@@ -34,6 +35,12 @@ func handle[R Request, Res Response](handler HandlerInterface[R, Res]) fiber.Han
 
 		if err := c.ReqHeaderParser(&req); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		if headerReq, ok := any(&req).(*webhookHandler.GithubWebhookRequest); ok {
+			headerReq.Event = c.Get("X-GitHub-Event")
+			headerReq.Signature = c.Get("X-Hub-Signature")
+			headerReq.Signature256 = c.Get("X-Hub-Signature-256")
 		}
 
 		/*

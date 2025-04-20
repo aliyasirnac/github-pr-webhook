@@ -13,8 +13,7 @@ type App interface {
 	Stop(ctx context.Context) error
 }
 
-func InitApp(app App) error {
-	parentCtx := context.Background()
+func InitApp(app App, parentCtx context.Context) error {
 	closeChan := make(chan os.Signal, 2)
 	signal.Notify(closeChan, syscall.SIGTERM, syscall.SIGINT)
 

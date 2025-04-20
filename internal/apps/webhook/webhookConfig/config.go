@@ -1,10 +1,14 @@
 package webhookConfig
 
-import "context"
+import (
+	"context"
+	"github.com/aliyasirnac/github-pr-webhook-bot/pkg/config"
+)
 
 type ServerConfig struct {
 	Postgres      Postgres
 	OpenTelemetry OpenTelemetry
+	Nats          config.NatsConfig
 }
 
 type Postgres struct {
