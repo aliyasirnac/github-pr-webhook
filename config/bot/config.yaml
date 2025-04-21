@@ -1,0 +1,6 @@
+telegram:
+  apiKey: ${TELEGRAM_API_KEY}
+  channelId: ${TELEGRAM_CHANNEL_ID}
+
+pubsub:
+  connectionUrl: ${PUBSUB_CONNECTION_URL}

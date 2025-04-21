@@ -1,5 +1,5 @@
 package config
 
-type NatsConfig struct {
+type PubSubConfig struct {
 	ConnectionUrl string
 }

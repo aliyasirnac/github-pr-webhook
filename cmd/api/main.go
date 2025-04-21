@@ -13,7 +13,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	config, err := webhookConfig.LoadConfig(ctx)
+	config, err := webhookConfig.LoadConfig()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}

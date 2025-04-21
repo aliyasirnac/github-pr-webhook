@@ -1,0 +1,8 @@
+postgres:
+  dsn: ${POSTGRES_DSN}
+
+opentelemetry:
+  otelTraceEndpoint: ${OPENTELEMETRY_OTEL_TRACE_ENDPOINT}
+
+pubsub:
+  connectionUrl: ${PUBSUB_CONNECTION_URL}
