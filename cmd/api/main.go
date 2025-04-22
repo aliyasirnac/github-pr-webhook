@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
-	rabbitmq := pubsub.NewRabbitMQ()
+	rabbitmq := pubsub.NewRabbitMQ(&config.PubSub)
 	serverApp := serverapp.New(config, rabbitmq)
 	err = app.InitApp(serverApp, ctx)
 	if err != nil {

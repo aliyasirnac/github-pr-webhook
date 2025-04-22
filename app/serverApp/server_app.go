@@ -69,6 +69,13 @@ func (s *ServerApp) Start(ctx context.Context) error {
 }
 
 func (s *ServerApp) Stop(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	if err := s.PubSub.Close(); err != nil {
+		zap.L().Error("Error closing PubSub", zap.Error(err))
+		return err
+	}
 	//close database
 	if err := s.app.ShutdownWithTimeout(5 * time.Second); err != nil {
 		zap.L().Error("Server shutdown failed", zap.Error(err))

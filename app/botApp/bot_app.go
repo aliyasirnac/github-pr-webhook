@@ -28,6 +28,10 @@ func (s *BotApp) Start(ctx context.Context) error {
 }
 
 func (s *BotApp) Stop(ctx context.Context) error {
-	s.PubSub.Close()
+	err := s.PubSub.Close()
+	if err != nil {
+		zap.L().Error("Error closing PubSub", zap.Error(err))
+		return err
+	}
 	return nil
 }

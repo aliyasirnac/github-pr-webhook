@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	natsPubSub := pubsub.NewRabbitMQ()
+	natsPubSub := pubsub.NewRabbitMQ(&config.PubSub)
 	botApp := botapp.New(natsPubSub, config)
 	err = app.InitApp(botApp, ctx)
 	if err != nil {

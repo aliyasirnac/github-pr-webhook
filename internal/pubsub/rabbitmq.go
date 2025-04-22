@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"github.com/aliyasirnac/github-pr-webhook-bot/pkg/config"
 	"github.com/aliyasirnac/github-pr-webhook-bot/pkg/pubsubinterface"
 	"github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
@@ -15,8 +16,8 @@ type RabbitMQ struct {
 	mu       sync.Mutex
 }
 
-func NewRabbitMQ() *RabbitMQ {
-	conn, err := amqp091.Dial("amqp://guest:guest@localhost:5672/")
+func NewRabbitMQ(config *config.PubSubConfig) *RabbitMQ {
+	conn, err := amqp091.Dial(config.ConnectionUrl)
 	if err != nil {
 		zap.L().Fatal("Failed to connect to RabbitMQ", zap.Error(err))
 		panic(err)
