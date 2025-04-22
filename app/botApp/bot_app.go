@@ -17,7 +17,7 @@ func New(pubsub pubsubinterface.PubSub, config *botconfig.BotConfig) *BotApp {
 }
 
 func (s *BotApp) Start(ctx context.Context) error {
-	err := s.PubSub.Subscribe("bot", func(message pubsubinterface.Message) {
+	err := s.PubSub.Subscribe("bot-exchange", "bot-queue", "tbot.*", func(message pubsubinterface.Message) {
 		zap.L().Info("Received message", zap.Any("message", message))
 	})
 	if err != nil {

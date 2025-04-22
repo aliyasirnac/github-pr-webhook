@@ -28,7 +28,7 @@ func NewGithubWebhookHandler(sub pubsubinterface.PubSub) *GithubWebhookHandler {
 
 func (w *GithubWebhookHandler) Handle(ctx context.Context, req *GithubWebhookRequest) (*GithubWebhookResponse, error) {
 	zap.L().Info("githubWebhookHandler.Handle", zap.Any("req", req))
-	err := w.PubSub.Publish("bot", []byte("deneme"))
+	err := w.PubSub.Publish("bot-exchange", "tbot.webhook", []byte("deneme"))
 	if err != nil {
 		zap.L().Error("githubWebhookHandler.Handle", zap.Error(err))
 		return nil, err

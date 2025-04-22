@@ -17,15 +17,17 @@ func NewNatsPubSub(url string) (*NatsPubSub, error) {
 	return &NatsPubSub{conn: conn}, nil
 }
 
-func (n *NatsPubSub) Publish(topic string, data []byte) error {
-	return n.conn.Publish(topic, data)
+func (n *NatsPubSub) Publish(topic, event string, data []byte) error {
+	subject := topic + "." + event
+	return n.conn.Publish(subject, data)
 }
 
-func (n *NatsPubSub) Subscribe(topic string, h func(pubsubinterface.Message)) error {
-	_, err := n.conn.Subscribe(topic, func(msg *nats.Msg) {
+func (n *NatsPubSub) Subscribe(_, queueName, pattern string, h func(pubsubinterface.Message)) error {
+	_, err := n.conn.QueueSubscribe(pattern, queueName, func(msg *nats.Msg) {
 		h(pubsubinterface.Message{
 			Topic: msg.Subject,
 			Data:  msg.Data,
+			Event: pattern,
 		})
 	})
 	return err

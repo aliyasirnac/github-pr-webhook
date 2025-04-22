@@ -28,7 +28,7 @@ func NewRabbitMQ(config *config.PubSubConfig) *RabbitMQ {
 	}
 }
 
-func (r *RabbitMQ) Publish(topic string, data []byte) error {
+func (r *RabbitMQ) Publish(exchange, event string, data []byte) error {
 	channel, err := r.conn.Channel()
 	if err != nil {
 		zap.L().Error("Failed to open a channel", zap.Error(err))
@@ -39,25 +39,19 @@ func (r *RabbitMQ) Publish(topic string, data []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	q, err := channel.QueueDeclare(topic, true, false, false, false, nil)
-	if err != nil {
-		zap.L().Error("Failed to declare a queue", zap.Error(err))
+	if err := channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil); err != nil {
+		zap.L().Error("Failed to declare exchange", zap.Error(err))
 		return err
 	}
 
-	err = channel.Qos(1, 0, false)
-	if err != nil {
-		zap.L().Error("Failed to set QoS", zap.Error(err))
-		return err
-	}
-
-	return channel.PublishWithContext(ctx, "", q.Name, false, false, amqp091.Publishing{
-		ContentType: "application/json",
-		Body:        data,
+	return channel.PublishWithContext(ctx, exchange, event, false, false, amqp091.Publishing{
+		ContentType:  "text/plain",
+		Body:         data,
+		DeliveryMode: amqp091.Persistent,
 	})
 }
 
-func (r *RabbitMQ) Subscribe(topic string, handler func(pubsubinterface.Message)) error {
+func (r *RabbitMQ) Subscribe(exchange, queueName, pattern string, handler func(pubsubinterface.Message)) error {
 	channel, err := r.conn.Channel()
 	if err != nil {
 		zap.L().Error("Failed to open a channel", zap.Error(err))
@@ -68,9 +62,19 @@ func (r *RabbitMQ) Subscribe(topic string, handler func(pubsubinterface.Message)
 	r.channels = append(r.channels, channel)
 	r.mu.Unlock()
 
-	q, err := channel.QueueDeclare(topic, true, false, false, false, nil)
+	if err := channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil); err != nil {
+		zap.L().Error("Failed to declare exchange", zap.Error(err))
+		return err
+	}
+
+	q, err := channel.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
-		zap.L().Error("Failed to declare a queue", zap.Error(err))
+		zap.L().Error("Failed to declare queue", zap.Error(err))
+		return err
+	}
+
+	if err := channel.QueueBind(q.Name, pattern, exchange, false, nil); err != nil {
+		zap.L().Error("Failed to bind queue", zap.Error(err))
 		return err
 	}
 
@@ -83,8 +87,9 @@ func (r *RabbitMQ) Subscribe(topic string, handler func(pubsubinterface.Message)
 	go func() {
 		for msg := range msgs {
 			handler(pubsubinterface.Message{
-				Topic: topic,
+				Topic: exchange,
 				Data:  msg.Body,
+				Event: pattern,
 			})
 		}
 	}()
