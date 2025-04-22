@@ -49,8 +49,10 @@ func (s *ServerApp) Start(ctx context.Context) error {
 	app := fiber.New(fiber.Config{})
 	s.app = app
 	app.Use(otelfiber.Middleware())
+
+	webhookRouter := app.Group("/webhook")
 	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
-	app.Post("/webhook", handle(githubWebhookHandler))
+	webhookRouter.Post("/github", handle(githubWebhookHandler))
 
 	go func() {
 		err := app.Listen(":8080")
@@ -59,6 +61,7 @@ func (s *ServerApp) Start(ctx context.Context) error {
 			errCh <- err
 		}
 	}()
+
 	err := <-errCh
 	if err != nil {
 		zap.L().Error("Server start failed", zap.Error(err))
